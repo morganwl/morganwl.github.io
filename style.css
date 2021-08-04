@@ -1,0 +1,29 @@
+body {
+    max-width: 8in;
+    margin-top: 12pt;
+    margin-left: 8%;
+    margin-right: 3%;
+    background-color: #fff5ff;
+    font-family: 'Optima';
+}
+
+.header {
+    margin-bottom: .5em;
+    padding-bottom: .5em;
+}
+
+.header h1 {
+    margin-bottom: .1em;
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar li {
+    display: inline;
+    padding-right: .5em;
+    margin-right: .5em;
+}
