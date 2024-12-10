@@ -1,18 +1,6 @@
 "use strict";
 
 function fetchText(url, page) {
-    // let params = {
-    //     action: "parse",
-    //     page: page,
-    //     prop: "text",
-    //     section: 0,
-    //     format: "json",
-    // };
-
-    // url = url + "?origin=*";
-    // Object.keys(params).forEach(function(key) {url += "&" + key + "=" + params[key];});
-    // return fetch(url)
-    //     .then(function(response) {return response.json();})
     return parsePage(url, page, "text", 0)
         .then(function(response) {return response.parse.text;});
 }
@@ -37,6 +25,27 @@ function parsePage(url, page, prop, section = null) {
     }
 
     return fetchParams(url, params);
+}
+
+function extractPoem(text) {
+    let parser = new DOMParser().parseFromString(text, "text/html");
+    let section = parser.getElementById("headertemplate").parentNode;
+    let poem = {};
+    let children = Array.from(section.children);
+    let i = 0;
+    let child;
+    let body = document.createElement("div");
+    while (i < children.length && children[i].id != "headertemplate") {
+        i += 1;
+    }
+    poem["header"] = children[i].children[0].outerHTML;
+    i += 1;
+    while (i < children.length && children[i].id != "ws-footer-inline") {
+        body.append(children[i]);
+        i += 1;
+    }
+    poem["poem"] = body.innerHTML;
+    return poem;
 }
 
 function chooseAuthor(url) {
@@ -79,12 +88,20 @@ function choosePage(url) {
         .catch(function(error) {console.log(error);});
 }
 
+function insertPoem(poem) {
+    for (let key in poem) {
+        let elm = document.getElementById(key);
+        if (elm) {
+            elm.innerHTML = poem[key];
+        }
+    }
+}
+
 function getPoem() {
     let url = "https://ru.wikisource.org/w/api.php";
 
     let poem = document.getElementById('poem');
     let hdr = document.getElementById('header');
-    let page;
     choosePage(url)
         .then(function(page) {return fetchText(url, page);})
         .then(function(response) {
@@ -92,9 +109,13 @@ function getPoem() {
         })
         // .then(function(text) {console.log(text); return new DOMParser().parseFromString(text, "text/html");})
         // .then(function(text) {return text.getElementById('mw-content-text');})
-        .then(function(text) {
-            poem.innerHTML = text;
-        })
+        .then(function(text) { return extractPoem(text); return text; })
+        // .then(function(text) {
+        //     return {
+        //         poem: text,
+        //     }
+        // })
+        .then(function(poem) { insertPoem(poem); })
         .catch(function(error) {console.log(error);});
 }
     
